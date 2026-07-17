@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+* Add runner-global directed projection views, allowing rewrites to match
+  through stable materialization boundaries without equating the boundary with
+  its definition.
+* Add computed rewrites with scoped, declarative right-hand sides which may
+  inspect matched analyses and e-nodes, reuse captured e-classes, or decline a
+  match without gaining mutation access to the e-graph.
+
 ## 0.6.0.0 -- 2024-07-13
 
 * Fix a soundness bug that would cause equality saturation to be broken when

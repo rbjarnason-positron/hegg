@@ -87,8 +87,12 @@ library
                       Data.Equality.Analysis.Monadic,
                       Data.Equality.Saturation.Scheduler,
                       Data.Equality.Saturation.Rewrites,
+                      Data.Equality.Saturation.Projection,
                       Data.Equality.Utils,
                       Data.Equality.Utils.SizedList
+    other-modules:    Data.Equality.Matching.Internal,
+                      Data.Equality.Saturation.Projection.Internal,
+                      Data.Equality.Saturation.Rewrites.Internal
     if impl(ghc >= 9.2)
         exposed-modules: Data.Equality.Utils.IntToIntMap
 
@@ -117,8 +121,8 @@ test-suite hegg-test
     type:             exitcode-stdio-1.0
     hs-source-dirs:   test
     main-is:          Test.hs
-    other-modules:    Invariants, Sym, Lambda, SimpleSym,
-                      T1, T2, T3, T32
+    other-modules:    Computed, Invariants, Sym, Lambda, SimpleSym,
+                      T1, T2, T3, T32, Projected
     if flag(vizdot)
         other-modules: VizDot
         cpp-options:  -DVIZDOT
