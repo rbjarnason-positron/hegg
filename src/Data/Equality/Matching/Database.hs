@@ -28,6 +28,7 @@ module Data.Equality.Matching.Database
   , Subst
   , lookupSubst
   , findSubst
+  , mapSubst
   , nullSubst
   , sizeSubst
   ) where
@@ -330,6 +331,10 @@ lookupSubst (MatchVar k) (Subst s) = IM.lookup k s
 findSubst :: Var -> Subst -> ClassId
 findSubst (MatchVar k) (Subst s) = s IM.! k
 
+-- | Map every e-class in a substitution.
+mapSubst :: (ClassId -> ClassId) -> Subst -> Subst
+mapSubst f (Subst s) = Subst $ fmap f s
+
 -- | An empty substitution
 emptySubst :: Subst
 emptySubst = Subst IM.empty
@@ -340,5 +345,4 @@ nullSubst (Subst s) = IM.null s
 
 sizeSubst :: Subst -> Int
 sizeSubst (Subst s) = IM.size s
-
 

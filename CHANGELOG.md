@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* Add directed e-class projections for matching through protected boundaries
+  without equating an anchor with its definition.
+
 ## 0.6.0.0 -- 2024-07-13
 
 * Fix a soundness bug that would cause equality saturation to be broken when

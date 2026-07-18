@@ -11,6 +11,7 @@ import Invariants
 import Sym
 import Lambda
 import SimpleSym
+import qualified Projected
 import T32
 
 import qualified T1
@@ -30,6 +31,7 @@ tests =testGroup "Tests"
     , testCase "T2" (T2.main `catch` (\(e :: SomeException) -> assertFailure (show e)))
     , testCase "T3" (T3.main `catch` (\(e :: SomeException) -> assertFailure (show e)))
     , testT32
+    , Projected.tests
 # ifdef VIZDOT
       , testCase "e-graph visualization" VizDot.visualizeSaturatedEGraph
 # endif
