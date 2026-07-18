@@ -64,8 +64,10 @@ projectedMatchingView projectionView egraph
         error "projected saturation: a protected projection points to itself"
     | hasDuplicateKeys protected =
         error "projected saturation: duplicate protected projection key"
-    | length protected /= IS.size protectedRoots =
+    | S.size protectedPairs /= IS.size protectedRoots =
         error "projected saturation: protected projection classes were merged"
+    | S.size protectedTriples /= S.size protectedPairs =
+        error "projected saturation: protected projection has multiple children"
     | not . IS.null $ protectedRoots `IS.intersection` transparentRoots =
         error "projected saturation: a protected class also contains an alias"
     | hasProtectedCycle projections =
@@ -75,7 +77,9 @@ projectedMatchingView projectionView egraph
           { matchingDatabase = database
           , protectedClasses = protectedRoots
           , protectedEdges =
-              [(root, child) | (Just _, root, child) <- projections]
+              S.toList $
+                S.fromList
+                  [(root, child) | (Just _, root, child) <- projections]
           , visibleNodes = closure
           }
   where
@@ -105,7 +109,11 @@ projectedMatchingView projectionView egraph
           Just (TransparentProjection child) ->
               (nodes, (Nothing, root, find child egraph) : edges, keys)
 
-    protectedRoots = IS.fromList $ map snd protected
+    protectedPairs = S.fromList protected
+    protectedTriples =
+        S.fromList
+          [(key, root, child) | (Just key, root, child) <- projections]
+    protectedRoots = IS.fromList $ map snd $ S.toList protectedPairs
     transparentRoots =
         IS.fromList [root | (Nothing, root, _) <- projections]
     reverseEdges =
@@ -149,8 +157,9 @@ insertVisibleNode root node (DB relations) =
           (IM.alter (Just . populate xs) x children')
 
 hasDuplicateKeys :: Ord key => [(key, Int)] -> Bool
-hasDuplicateKeys = any ((> 1) . length) . M.elems
-                 . M.fromListWith (<>) . map (\(key, root) -> (key, [root]))
+hasDuplicateKeys = any ((> 1) . IS.size) . M.elems
+                 . M.fromListWith IS.union
+                 . map (\(key, root) -> (key, IS.singleton root))
 
 -- Transparent aliases may legitimately be merged back into a class reached by
 -- a protected projection.  Their closure is finite, so only cycles made solely

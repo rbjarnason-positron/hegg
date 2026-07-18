@@ -135,6 +135,9 @@ tests =
         "Projected saturation"
         [ testCase "follows transitive projections" transitiveProjection
         , testCase
+            "allows recanonicalized projection nodes"
+            allowsRecanonicalizedProjectionNodes
+        , testCase
             "preserves a captured projected subtree"
             preservesCapturedSubtree
         , testCase "aliases a protected RHS" aliasesProtectedRhs
@@ -149,6 +152,22 @@ tests =
             rejectsDistinctAnchors
         , testCase "empty view agrees with the default runner" emptyViewMatchesDefault
         ]
+
+allowsRecanonicalizedProjectionNodes :: IO ()
+allowsRecanonicalizedProjectionNodes = do
+    let ((definition, anchor, hit), graph) = egraph $ do
+            value <- add (Node (Value "x"))
+            definition' <- add (Node (Pair value value))
+            anchor' <- addProtected "anchor" definition'
+            hit' <- add (Node (Value "hit"))
+            rebuild
+            runProjected
+                [ pat (Pair "x" "x") := pat (Value "hit")
+                ]
+            pure (definition', anchor', hit')
+
+    find definition graph @?= find hit graph
+    assertSeparate "anchor merged with its definition" graph anchor definition
 
 transitiveProjection :: IO ()
 transitiveProjection = do
