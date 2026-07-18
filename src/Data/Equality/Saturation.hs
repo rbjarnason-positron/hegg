@@ -6,6 +6,7 @@
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE MonoLocalBinds #-}
+{-# LANGUAGE MultiWayIf #-}
 {-|
   Given an input program 𝑝, equality saturation constructs an e-graph 𝐸 that
   represents a large set of programs equivalent to 𝑝, and then extracts the
@@ -220,11 +221,17 @@ runEqualitySaturationUsing buildView projectionOps scheduler rewrites =
         validateProtected matchingView updated `seq` pure ()
         let afterMemo = updated ^. _memo
             afterClasses = classes updated
-        unless
-          ( G.sizeNM afterMemo == G.sizeNM beforeMemo
-              && IM.size afterClasses == IM.size beforeClasses
-          )
-          (go (iteration + 1) newStats)
+            saturated =
+                G.sizeNM afterMemo == G.sizeNM beforeMemo
+                  && IM.size afterClasses == IM.size beforeClasses
+            haveBannedRules =
+                not (IM.null newStats)
+                  && any (isBanned @lang @scheduler iteration) newStats
+        if
+          | saturated && haveBannedRules ->
+              go (iteration + 1) mempty
+          | saturated -> pure ()
+          | otherwise -> go (iteration + 1) newStats
 
     matchRewrite
         :: EGraph analysis lang
